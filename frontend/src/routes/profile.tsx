@@ -22,8 +22,10 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 
 import { currentUser } from "@/data/employee";
+import { requireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/profile")({
+  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "My Profile · Dayflow HRMS" },

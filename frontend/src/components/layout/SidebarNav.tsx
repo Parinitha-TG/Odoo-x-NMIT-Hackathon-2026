@@ -1,8 +1,9 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LifeBuoy, ChevronsUpDown, LogOut, Waves } from "lucide-react";
 import { adminNav, employeeNav } from "./nav-items";
 import { currentUser } from "@/data/employee";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,13 @@ import {
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
 
   const renderItems = (items: typeof employeeNav) =>
     items.map((item) => {
@@ -51,6 +59,12 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       );
     });
 
+  // Determine display name — use auth user if available, else fallback to demo data
+  const displayName = user?.email?.split("@")[0] ?? currentUser.name;
+  const displayEmail = user?.email ?? currentUser.email;
+  const displayRole = user?.role === "HR_ADMIN" ? "HR Admin" : "Employee";
+  const displayInitials = displayName.slice(0, 2).toUpperCase();
+
   return (
     <div className="flex h-full flex-col bg-sidebar">
       <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
@@ -69,10 +83,15 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         </p>
         <div className="space-y-0.5">{renderItems(employeeNav)}</div>
 
-        <p className="px-3 pt-6 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Administration
-        </p>
-        <div className="space-y-0.5">{renderItems(adminNav)}</div>
+        {/* Only show admin nav if user has HR_ADMIN role */}
+        {user?.role === "HR_ADMIN" && (
+          <>
+            <p className="px-3 pt-6 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Administration
+            </p>
+            <div className="space-y-0.5">{renderItems(adminNav)}</div>
+          </>
+        )}
       </nav>
 
       <div className="border-t border-sidebar-border p-3">
@@ -88,19 +107,19 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         <DropdownMenu>
           <DropdownMenuTrigger className="mt-2 flex w-full items-center gap-3 rounded-lg border border-sidebar-border bg-card px-2.5 py-2 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-soft text-[12px] font-bold text-primary">
-              {currentUser.initials}
+              {displayInitials}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-semibold text-foreground">
-                {currentUser.name}
+                {displayName}
               </span>
-              <span className="block truncate text-[11px] text-muted-foreground">Employee</span>
+              <span className="block truncate text-[11px] text-muted-foreground">{displayRole}</span>
             </span>
             <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              {currentUser.email}
+              {displayEmail}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -110,8 +129,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               <Link to="/settings">Settings</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
-              <LogOut className="h-4 w-4" /> Sign out (demo)
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="h-4 w-4" /> Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -119,3 +138,4 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     </div>
   );
 }
+

@@ -15,6 +15,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { StatusBadge, statusTone } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { requireAuth } from "@/lib/auth-guard";
 
 import {
   Table,
@@ -33,6 +34,7 @@ import {
 } from "@/data/employee";
 
 export const Route = createFileRoute("/attendance")({
+  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "Attendance · Dayflow HRMS" },

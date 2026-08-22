@@ -1,19 +1,24 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, ShieldCheck, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { redirectIfAuthenticated } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: () => redirectIfAuthenticated(),
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [role, setRole] = useState<"employee" | "hr">("employee");
   const [email, setEmail] = useState("nirjala.chauhan@dayflow.io");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRoleChange = (newRole: "employee" | "hr") => {
     setRole(newRole);
@@ -26,7 +31,7 @@ function LoginPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -35,8 +40,18 @@ function LoginPage() {
       return;
     }
 
-    // Frontend-only demo login.
-    // Backend authentication will be connected later.
+    setLoading(true);
+
+    const result = await login(email.trim(), password);
+
+    setLoading(false);
+
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    // Navigate based on selected role (backend confirms actual role)
     if (role === "hr") {
       navigate({ to: "/admin" });
     } else {
@@ -213,10 +228,20 @@ function LoginPage() {
 
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  disabled={loading}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Sign in
-                  <ArrowRight className="h-4 w-4" />
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Signing in…
+                    </>
+                  ) : (
+                    <>
+                      Sign in
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
                 </button>
               </form>
 

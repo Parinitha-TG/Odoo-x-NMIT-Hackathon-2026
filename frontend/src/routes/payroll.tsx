@@ -13,8 +13,10 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Separator } from "@/components/ui/separator";
 
 import { payrollSummary } from "@/data/employee";
+import { requireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/payroll")({
+  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "Payroll · Dayflow HRMS" },

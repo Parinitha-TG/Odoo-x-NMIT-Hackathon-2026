@@ -24,8 +24,10 @@ import {
   leaveRequests,
   type LeaveStatus,
 } from "@/data/employee";
+import { requireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/leave")({
+  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "Leave · Dayflow HRMS" },

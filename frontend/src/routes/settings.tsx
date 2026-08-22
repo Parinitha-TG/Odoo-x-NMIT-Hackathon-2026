@@ -31,8 +31,10 @@ import {
 } from "@/components/ui/select";
 
 import { currentUser } from "@/data/employee";
+import { requireAuth } from "@/lib/auth-guard";
 
 export const Route = createFileRoute("/settings")({
+  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "Settings · Dayflow HRMS" },

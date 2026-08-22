@@ -20,6 +20,7 @@ import { WeeklyAttendanceChart } from "@/components/dashboard/WeeklyAttendanceCh
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { requireAuth } from "@/lib/auth-guard";
 
 import {
   currentUser,
@@ -29,7 +30,7 @@ import {
   todaySummary,
 } from "@/data/employee";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")({\n  beforeLoad: () => requireAuth(),
   head: () => ({
     meta: [
       { title: "Dashboard · Dayflow HRMS" },

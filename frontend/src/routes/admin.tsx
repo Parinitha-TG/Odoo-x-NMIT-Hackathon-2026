@@ -27,6 +27,7 @@ import {
 import { StatCard } from "@/components/common/StatCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { requireHR } from "@/lib/auth-guard";
 
 import {
   Dialog,
@@ -62,6 +63,7 @@ import {
 } from "@/data/org";
 
 export const Route = createFileRoute("/admin")({
+  beforeLoad: () => requireHR(),
   head: () => ({
     meta: [
       { title: "HR Overview · Dayflow HRMS" },
