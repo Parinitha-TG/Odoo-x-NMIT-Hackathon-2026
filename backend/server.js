@@ -3,13 +3,37 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
+const authMiddleware = require("./middleware/authMiddleware");
+const requireRole = require("./middleware/rbacMiddleware");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+
+// Authentication routes
 app.use("/api/auth", authRoutes);
+
+// Test protected endpoint
+app.get("/api/auth/me", authMiddleware, (req, res) => {
+    res.json({
+        success: true,
+        user: req.user
+    });
+});
+
+// Test HR-only endpoint
+app.get(
+    "/api/auth/hr-test",
+    authMiddleware,
+    requireRole("HR_ADMIN"),
+    (req, res) => {
+        res.json({
+            success: true,
+            message: "HR access granted"
+        });
+    }
+);
 
 // Health check
 app.get("/", (req, res) => {
